@@ -2,12 +2,13 @@ import sun.awt.SubRegionShowable;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class ElectoralMap{
-    static HashMap<String, HashMap<String, subRegion> allRegions = new HashMap<>();
+    public static HashMap<String, HashMap<String, subRegion>> allRegions = new HashMap<>();
     private static class subRegion{
         String name;
         ArrayList<double[]> xcoords;
@@ -25,23 +26,36 @@ public class ElectoralMap{
             votes[0] = Integer.parseInt(newVotes[1]);
             votes[1] = Integer.parseInt(newVotes[2]);
             votes[2] = Integer.parseInt(newVotes[3]);
+            if(votes[0] > (votes [1]) && (votes[0]) > (votes [2])){
+                StdDraw.setPenColor(StdDraw.RED);
+            }
+            else if((votes[1]) > (votes [0]) && (votes[1]) > (votes [2])){
+                StdDraw.setPenColor(StdDraw.BLUE);
+            }
+            else {
+                StdDraw.setPenColor(StdDraw.GREEN);
+            }
         }
 
     }
 
     public static void main(String[] args) throws Exception {
-        getGeoData();
-        getVotingData();
-        draw();
+        getGeoData("WY");
+        getVotingData("WY","1960");
+        draw("WY");
     }
-    public static void getVotingData(String region, String year)
+    public static void getVotingData(String region, String year) throws FileNotFoundException
     {
-        Scanner inputObjectCoords = new Scanner(f1);
         File f2 = new File("./input/" + region + year + ".txt");
         Scanner inputObjectVotes = new Scanner(f2);
         inputObjectVotes.nextLine();
+        while (inputObjectVotes.hasNextLine())
+        {
+            String[] votes = inputObjectVotes.nextLine().split(",");
+            allRegions.get(region).get(votes[0]).changeVotes(votes);
+        }
     }
-    public static void getGeoData(String region)
+    public static void getGeoData(String region) throws FileNotFoundException
     {
         File f1 = new File("./input/" + region + ".txt");
         Scanner inputObjectCoords = new Scanner(f1);
@@ -82,7 +96,7 @@ public class ElectoralMap{
             }
             }
     }
-    public static void draw(String region)
+    public static void draw(String region) throws FileNotFoundException
     {
         String[] firstLine = new String[4];
         File f1 = new File("./input/" + region + ".txt");
@@ -104,6 +118,18 @@ public class ElectoralMap{
         StdDraw.setXscale(dub[0], dub[1]);
         StdDraw.setYscale(dub[2], dub[3]);
         inputObjectCoords.close();
+        for (String key: allRegions.keySet())
+        {
+            for (String innerKey: allRegions.get(key).keySet())
+            {
+                for (int i = 0 ; i < allRegions.get(key).get(innerKey).xcoords.size() ; i++)
+                {
+                    StdDraw.setPenColor(allRegions.get(key).get(innerKey).color);
+                    StdDraw.filledPolygon(allRegions.get(key).get(innerKey).xcoords.get(i),allRegions.get(key).get(innerKey).ycoords.get(i));
+                }
+            }
+        }
+        StdDraw.show();
     }
 
 }
