@@ -8,28 +8,32 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class ElectoralMap{
-    public static HashMap<String, HashMap<String, subRegion>> allRegions = new HashMap<>();
-    private static class subRegion{
+    public static HashMap<String, HashMap<String, SubRegion>> allRegions = new HashMap<>();
+    private static class SubRegion{
         String name;
         ArrayList<double[]> xcoords;
         ArrayList<double[]> ycoords;
-        int[] votes;
+        int REP;
+        int DEM;
+        int OTH;
         Color color;
-        public subRegion(double[] x,double[] y,String myname)
+        public SubRegion(double[] x,double[] y,String myname)
         {
+            ArrayList<double[]> xcoords = new ArrayList<>();
+            ArrayList<double[]> ycoords = new ArrayList<>();
             name = myname;
             xcoords.add(x);
             ycoords.add(y);
         }
         public void changeVotes(String[] newVotes)
         {
-            votes[0] = Integer.parseInt(newVotes[1]);
-            votes[1] = Integer.parseInt(newVotes[2]);
-            votes[2] = Integer.parseInt(newVotes[3]);
-            if(votes[0] > (votes [1]) && (votes[0]) > (votes [2])){
+            REP = Integer.parseInt(newVotes[1]);
+            DEM = Integer.parseInt(newVotes[2]);
+            OTH = Integer.parseInt(newVotes[3]);
+            if( REP > DEM && REP > OTH){
                 StdDraw.setPenColor(StdDraw.RED);
             }
-            else if((votes[1]) > (votes [0]) && (votes[1]) > (votes [2])){
+            else if(DEM > REP && DEM > OTH){
                 StdDraw.setPenColor(StdDraw.BLUE);
             }
             else {
@@ -40,9 +44,9 @@ public class ElectoralMap{
     }
 
     public static void main(String[] args) throws Exception {
-        getGeoData("WY");
-        getVotingData("WY","1960");
-        draw("WY");
+        getGeoData("WV");
+        getVotingData("WV","2000");
+        draw("WV");
     }
     public static void getVotingData(String region, String year) throws FileNotFoundException
     {
@@ -64,8 +68,7 @@ public class ElectoralMap{
 
         int numRegions = Integer.parseInt(inputObjectCoords.nextLine());
         int numRegionsExecuted = 0;
-        while (numRegionsExecuted < numRegions)
-        {
+        while (numRegionsExecuted < numRegions) {
             inputObjectCoords.nextLine();
             String subRegionName = inputObjectCoords.nextLine();
             String regionName = inputObjectCoords.nextLine();
@@ -73,28 +76,25 @@ public class ElectoralMap{
             int numPointsExecuted = 0;
             double[] x = new double[numPoints];
             double[] y = new double[numPoints];
-            while (numPointsExecuted < numPoints)
-            {
+            while (numPointsExecuted < numPoints) {
                 String[] coords = inputObjectCoords.nextLine().split("   ");
                 x[numPointsExecuted] = Double.parseDouble(coords[0].trim());
                 y[numPointsExecuted] = Double.parseDouble(coords[1].trim());
                 numPointsExecuted++;
             }
-            if(!allRegions.containsKey(regionName))
-            {
-                HashMap<String, subRegion> regionHashMap = new HashMap<>();
-              allRegions.put(regionName, regionHashMap);
+            if (!allRegions.containsKey(regionName)) {
+                HashMap<String, SubRegion> regionHashMap = new HashMap<>();
+                allRegions.put(regionName, regionHashMap);
             }
-            if(!allRegions.get(regionName).containsKey(subRegionName)) {
-                subRegion tempSubRegion = new subRegion(x, y, subRegionName);
-                allRegions.get(regionName).put(subRegionName, tempSubRegion );
-            }
-            else
-            {
+            if (!allRegions.get(regionName).containsKey(subRegionName)) {
+                SubRegion tempSubRegion = new SubRegion(x, y, subRegionName);
+                allRegions.get(regionName).put(subRegionName, tempSubRegion);
+            } else {
                 allRegions.get(regionName).get(subRegionName).xcoords.add(x);
                 allRegions.get(regionName).get(subRegionName).ycoords.add(y);
             }
-            }
+            numRegionsExecuted++;
+        }
     }
     public static void draw(String region) throws FileNotFoundException
     {
