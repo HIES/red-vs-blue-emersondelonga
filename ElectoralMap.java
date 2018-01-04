@@ -7,17 +7,18 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class ElectoralMap{
-    private class subRegion{
+    static HashMap<String, HashMap<String, subRegion> allRegions = new HashMap<>();
+    private static class subRegion{
         String name;
-        double[] xcoords;
-        double[] ycoords;
+        ArrayList<double[]> xcoords;
+        ArrayList<double[]> ycoords;
         int[] votes;
         Color color;
-        private subRegion(double[] x,double[] y,String myname)
+        public subRegion(double[] x,double[] y,String myname)
         {
             name = myname;
-            xcoords = x;
-            ycoords = y;
+            xcoords.add(x);
+            ycoords.add(y);
         }
         public void changeVotes(String[] newVotes)
         {
@@ -29,18 +30,65 @@ public class ElectoralMap{
     }
 
     public static void main(String[] args) throws Exception {
-        visualize("WV","1988");
+        getGeoData();
+        getVotingData();
+        draw();
     }
-
-    public static void visualize(String region, String year) throws Exception {
-        String[] firstLine = new String[4];
-        File f1 = new File("./input/" + region + ".txt");
+    public static void getVotingData(String region, String year)
+    {
         Scanner inputObjectCoords = new Scanner(f1);
         File f2 = new File("./input/" + region + year + ".txt");
         Scanner inputObjectVotes = new Scanner(f2);
         inputObjectVotes.nextLine();
-        String[] line = new String[2];
-        String[] line2 = new String [2];
+    }
+    public static void getGeoData(String region)
+    {
+        File f1 = new File("./input/" + region + ".txt");
+        Scanner inputObjectCoords = new Scanner(f1);
+        inputObjectCoords.nextLine(); // Skip canvas calibration
+        inputObjectCoords.nextLine();
+
+        int numRegions = Integer.parseInt(inputObjectCoords.nextLine());
+        int numRegionsExecuted = 0;
+        while (numRegionsExecuted < numRegions)
+        {
+            inputObjectCoords.nextLine();
+            String subRegionName = inputObjectCoords.nextLine();
+            String regionName = inputObjectCoords.nextLine();
+            int numPoints = Integer.parseInt(inputObjectCoords.nextLine().trim());
+            int numPointsExecuted = 0;
+            double[] x = new double[numPoints];
+            double[] y = new double[numPoints];
+            while (numPointsExecuted < numPoints)
+            {
+                String[] coords = inputObjectCoords.nextLine().split("   ");
+                x[numPointsExecuted] = Double.parseDouble(coords[0].trim());
+                y[numPointsExecuted] = Double.parseDouble(coords[1].trim());
+                numPointsExecuted++;
+            }
+            if(!allRegions.containsKey(regionName))
+            {
+                HashMap<String, subRegion> regionHashMap = new HashMap<>();
+              allRegions.put(regionName, regionHashMap);
+            }
+            if(!allRegions.get(regionName).containsKey(subRegionName)) {
+                subRegion tempSubRegion = new subRegion(x, y, subRegionName);
+                allRegions.get(regionName).put(subRegionName, tempSubRegion );
+            }
+            else
+            {
+                allRegions.get(regionName).get(subRegionName).xcoords.add(x);
+                allRegions.get(regionName).get(subRegionName).ycoords.add(y);
+            }
+            }
+    }
+    public static void draw(String region)
+    {
+        String[] firstLine = new String[4];
+        File f1 = new File("./input/" + region + ".txt");
+        Scanner inputObjectCoords = new Scanner(f1);
+        String[] line;
+        String[] line2;
         line = inputObjectCoords.nextLine().split("   ");
         line2 = inputObjectCoords.nextLine().split("   ");
         StdDraw.enableDoubleBuffering();
@@ -55,42 +103,7 @@ public class ElectoralMap{
         StdDraw.setCanvasSize(512 * (xSize / ySize), 512);
         StdDraw.setXscale(dub[0], dub[1]);
         StdDraw.setYscale(dub[2], dub[3]);
-
-        int numRegions = Integer.parseInt(inputObjectCoords.nextLine());
-        int numRegionsExecuted = 0;
-        while (numRegionsExecuted < numRegions)
-        {
-            inputObjectCoords.nextLine();
-            String [] votes = inputObjectVotes.nextLine().split(",");
-            String regionName = inputObjectCoords.nextLine();
-            String mapName = inputObjectCoords.nextLine();
-            int numPoints = Integer.parseInt(inputObjectCoords.nextLine().trim());
-            int numPointsExecuted = 0;
-            double[] x = new double[numPoints];
-            double[] y = new double[numPoints];
-            while (numPointsExecuted < numPoints)
-            {
-                String[] coords = inputObjectCoords.nextLine().split("   ");
-                x[numPointsExecuted] = Double.parseDouble(coords[0].trim());
-                y[numPointsExecuted] = Double.parseDouble(coords[1].trim());
-                numPointsExecuted++;
-            }
-            if(Integer.parseInt(votes[1]) > Integer.parseInt(votes [2]) && Integer.parseInt(votes[1]) > Integer.parseInt(votes [3])){
-                StdDraw.setPenColor(StdDraw.RED);
-            }
-            else if(Integer.parseInt(votes[2]) > Integer.parseInt(votes [1]) && Integer.parseInt(votes[2]) > Integer.parseInt(votes [3])){
-                StdDraw.setPenColor(StdDraw.BLUE);
-            }
-            else {
-                StdDraw.setPenColor(StdDraw.GREEN);
-            }
-            StdDraw.filledPolygon(x,y);
-            StdDraw.setPenColor(StdDraw.BLACK);
-            StdDraw.polygon(x,y);
-            numRegionsExecuted++;
-        }
         inputObjectCoords.close();
-
-        StdDraw.show();
     }
+
 }
