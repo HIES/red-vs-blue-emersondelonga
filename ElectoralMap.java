@@ -19,8 +19,8 @@ public class ElectoralMap{
         Color color;
         public SubRegion(double[] x,double[] y,String myname)
         {
-            ArrayList<double[]> xcoords = new ArrayList<>();
-            ArrayList<double[]> ycoords = new ArrayList<>();
+            xcoords = new ArrayList<>();
+            ycoords = new ArrayList<>();
             name = myname;
             xcoords.add(x);
             ycoords.add(y);
@@ -31,22 +31,22 @@ public class ElectoralMap{
             DEM = Integer.parseInt(newVotes[2]);
             OTH = Integer.parseInt(newVotes[3]);
             if( REP > DEM && REP > OTH){
-                StdDraw.setPenColor(StdDraw.RED);
+                color = StdDraw.RED;
             }
             else if(DEM > REP && DEM > OTH){
-                StdDraw.setPenColor(StdDraw.BLUE);
+                color = StdDraw.BLUE;
             }
             else {
-                StdDraw.setPenColor(StdDraw.GREEN);
+                color = StdDraw.GREEN;
             }
         }
 
     }
 
     public static void main(String[] args) throws Exception {
-        getGeoData("WV");
-        getVotingData("WV","2000");
-        draw("WV");
+        getGeoData("GA");
+        getVotingData("GA","2000");
+        draw("GA");
     }
     public static void getVotingData(String region, String year) throws FileNotFoundException
     {
@@ -122,10 +122,10 @@ public class ElectoralMap{
         {
             for (String innerKey: allRegions.get(key).keySet())
             {
-                for (int i = 0 ; i < allRegions.get(key).get(innerKey).xcoords.size() ; i++)
+                for (int i = 0; i < allRegions.get(key).get(innerKey).xcoords.size(); i++)
                 {
                     StdDraw.setPenColor(allRegions.get(key).get(innerKey).color);
-                    StdDraw.filledPolygon(allRegions.get(key).get(innerKey).xcoords.get(i),allRegions.get(key).get(innerKey).ycoords.get(i));
+                    StdDraw.filledPolygon(allRegions.get(key).get(innerKey).xcoords.get(i), allRegions.get(key).get(innerKey).ycoords.get(i));
                 }
             }
         }
