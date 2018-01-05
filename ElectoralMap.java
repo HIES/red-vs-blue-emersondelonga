@@ -44,19 +44,30 @@ public class ElectoralMap{
     }
 
     public static void main(String[] args) throws Exception {
-        getGeoData("GA");
-        getVotingData("GA","2000");
-        draw("GA");
+        String region = "USA-county";
+        String year = "2000";
+        for(int i = 1960 ; i <= 2016 ; i+=4) {
+            getGeoData(region);
+            getVotingData(Integer.toString(i));
+            draw(region, Integer.toString(i));
+            Thread.sleep(2000);
+        }
+
+//        getGeoData(region);
+//        getVotingData(year);
+//        draw(region, year);
     }
-    public static void getVotingData(String region, String year) throws FileNotFoundException
-    {
-        File f2 = new File("./input/" + region + year + ".txt");
-        Scanner inputObjectVotes = new Scanner(f2);
-        inputObjectVotes.nextLine();
-        while (inputObjectVotes.hasNextLine())
-        {
-            String[] votes = inputObjectVotes.nextLine().split(",");
-            allRegions.get(region).get(votes[0]).changeVotes(votes);
+    public static void getVotingData(String year) throws FileNotFoundException {
+        for (String key : allRegions.keySet()) {
+            File f2 = new File("./input/" + key + year + ".txt");
+            Scanner inputObjectVotes = new Scanner(f2);
+            inputObjectVotes.nextLine();
+            while (inputObjectVotes.hasNextLine()) {
+                String[] votes = inputObjectVotes.nextLine().split(",");
+                if (allRegions.get(key).containsKey(votes[0])) {
+                    allRegions.get(key).get(votes[0]).changeVotes(votes);
+                }
+            }
         }
     }
     public static void getGeoData(String region) throws FileNotFoundException
@@ -72,6 +83,16 @@ public class ElectoralMap{
             inputObjectCoords.nextLine();
             String subRegionName = inputObjectCoords.nextLine();
             String regionName = inputObjectCoords.nextLine();
+
+            if(subRegionName.contains(" Parish"))
+            {
+                subRegionName = subRegionName.substring(0,subRegionName.indexOf(" Parish"));
+            }
+            if(subRegionName.contains(" city"))
+            {
+                subRegionName = subRegionName.substring(0,subRegionName.indexOf(" city"));
+            }
+
             int numPoints = Integer.parseInt(inputObjectCoords.nextLine().trim());
             int numPointsExecuted = 0;
             double[] x = new double[numPoints];
@@ -96,7 +117,7 @@ public class ElectoralMap{
             numRegionsExecuted++;
         }
     }
-    public static void draw(String region) throws FileNotFoundException
+    public static void draw(String region, String year) throws FileNotFoundException
     {
         String[] firstLine = new String[4];
         File f1 = new File("./input/" + region + ".txt");
@@ -124,11 +145,17 @@ public class ElectoralMap{
             {
                 for (int i = 0; i < allRegions.get(key).get(innerKey).xcoords.size(); i++)
                 {
+                    if(allRegions.get(key).get(innerKey).color == null) {
+                        System.out.println(innerKey);
+                        allRegions.get(key).get(innerKey).color = StdDraw.BLACK;
+                    }
                     StdDraw.setPenColor(allRegions.get(key).get(innerKey).color);
                     StdDraw.filledPolygon(allRegions.get(key).get(innerKey).xcoords.get(i), allRegions.get(key).get(innerKey).ycoords.get(i));
                 }
             }
         }
+        StdDraw.setPenColor(StdDraw.BLACK);
+        StdDraw.textLeft(dub[0], dub[2] + .5, year);
         StdDraw.show();
     }
 
